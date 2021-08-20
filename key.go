@@ -70,12 +70,12 @@ type PrivateKey interface {
 // key is of an unsupported type.
 func FromCryptoPublicKey(cryptoPublicKey crypto.PublicKey) (PublicKey, error) {
 	switch cryptoPublicKey := cryptoPublicKey.(type) {
-	case *ecdsa.PublicKey:
-		return fromECPublicKey(cryptoPublicKey)
-	case *rsa.PublicKey:
-		return fromRSAPublicKey(cryptoPublicKey), nil
-	default:
-		return nil, fmt.Errorf("public key type %T is not supported", cryptoPublicKey)
+		case *ecdsa.PublicKey:
+			return fromECPublicKey(cryptoPublicKey)
+		case *rsa.PublicKey:
+			return fromRSAPublicKey(cryptoPublicKey), nil
+		default:
+			return nil, fmt.Errorf("public key type %T is not supported", cryptoPublicKey)
 	}
 }
 
@@ -84,12 +84,12 @@ func FromCryptoPublicKey(cryptoPublicKey crypto.PublicKey) (PublicKey, error) {
 // key is of an unsupported type.
 func FromCryptoPrivateKey(cryptoPrivateKey crypto.PrivateKey) (PrivateKey, error) {
 	switch cryptoPrivateKey := cryptoPrivateKey.(type) {
-	case *ecdsa.PrivateKey:
-		return fromECPrivateKey(cryptoPrivateKey)
-	case *rsa.PrivateKey:
-		return fromRSAPrivateKey(cryptoPrivateKey), nil
-	default:
-		return nil, fmt.Errorf("private key type %T is not supported", cryptoPrivateKey)
+		case *ecdsa.PrivateKey:
+			return fromECPrivateKey(cryptoPrivateKey)
+		case *rsa.PrivateKey:
+			return fromRSAPrivateKey(cryptoPrivateKey), nil
+		default:
+			return nil, fmt.Errorf("private key type %T is not supported", cryptoPrivateKey)
 	}
 }
 
@@ -143,23 +143,23 @@ func UnmarshalPrivateKeyPEM(data []byte) (PrivateKey, error) {
 	var key PrivateKey
 
 	switch {
-	case pemBlock.Type == "RSA PRIVATE KEY":
-		rsaPrivateKey, err := x509.ParsePKCS1PrivateKey(pemBlock.Bytes)
-		if err != nil {
-			return nil, fmt.Errorf("unable to decode RSA Private Key PEM data: %s", err)
-		}
-		key = fromRSAPrivateKey(rsaPrivateKey)
-	case pemBlock.Type == "EC PRIVATE KEY":
-		ecPrivateKey, err := x509.ParseECPrivateKey(pemBlock.Bytes)
-		if err != nil {
-			return nil, fmt.Errorf("unable to decode EC Private Key PEM data: %s", err)
-		}
-		key, err = fromECPrivateKey(ecPrivateKey)
-		if err != nil {
-			return nil, err
-		}
-	default:
-		return nil, fmt.Errorf("unable to get PrivateKey from PEM type: %s", pemBlock.Type)
+		case pemBlock.Type == "RSA PRIVATE KEY":
+			rsaPrivateKey, err := x509.ParsePKCS1PrivateKey(pemBlock.Bytes)
+			if err != nil {
+				return nil, fmt.Errorf("unable to decode RSA Private Key PEM data: %s", err)
+			}
+			key = fromRSAPrivateKey(rsaPrivateKey)
+		case pemBlock.Type == "EC PRIVATE KEY":
+			ecPrivateKey, err := x509.ParseECPrivateKey(pemBlock.Bytes)
+			if err != nil {
+				return nil, fmt.Errorf("unable to decode EC Private Key PEM data: %s", err)
+			}
+			key, err = fromECPrivateKey(ecPrivateKey)
+			if err != nil {
+				return nil, err
+			}
+		default:
+			return nil, fmt.Errorf("unable to get PrivateKey from PEM type: %s", pemBlock.Type)
 	}
 
 	addPEMHeadersToKey(pemBlock, key.PublicKey())
@@ -186,16 +186,16 @@ func UnmarshalPublicKeyJWK(data []byte) (PublicKey, error) {
 	}
 
 	switch {
-	case kty == "EC":
-		// Call out to unmarshal EC public key.
-		return ecPublicKeyFromMap(jwk)
-	case kty == "RSA":
-		// Call out to unmarshal RSA public key.
-		return rsaPublicKeyFromMap(jwk)
-	default:
-		return nil, fmt.Errorf(
-			"JWK Public Key type not supported: %q\n", kty,
-		)
+		case kty == "EC":
+			// Call out to unmarshal EC public key.
+			return ecPublicKeyFromMap(jwk)
+		case kty == "RSA":
+			// Call out to unmarshal RSA public key.
+			return rsaPublicKeyFromMap(jwk)
+		default:
+			return nil, fmt.Errorf(
+				"JWK Public Key type not supported: %q\n", kty,
+			)
 	}
 }
 
@@ -239,15 +239,15 @@ func UnmarshalPrivateKeyJWK(data []byte) (PrivateKey, error) {
 	}
 
 	switch {
-	case kty == "EC":
-		// Call out to unmarshal EC private key.
-		return ecPrivateKeyFromMap(jwk)
-	case kty == "RSA":
-		// Call out to unmarshal RSA private key.
-		return rsaPrivateKeyFromMap(jwk)
-	default:
-		return nil, fmt.Errorf(
-			"JWK Private Key type not supported: %q\n", kty,
-		)
+		case kty == "EC":
+			// Call out to unmarshal EC private key.
+			return ecPrivateKeyFromMap(jwk)
+		case kty == "RSA":
+			// Call out to unmarshal RSA private key.
+			return rsaPrivateKeyFromMap(jwk)
+		default:
+			return nil, fmt.Errorf(
+				"JWK Private Key type not supported: %q\n", kty,
+			)
 	}
 }

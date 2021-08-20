@@ -32,6 +32,7 @@ func NewClientKeyManager(trustKey PrivateKey, clientFile, clientDir string) (*Cl
 		clientFile: clientFile,
 		clientDir:  clientDir,
 	}
+
 	if err := m.loadKeys(); err != nil {
 		return nil, err
 	}
@@ -55,6 +56,7 @@ func (c *ClientKeyManager) loadKeys() (err error) {
 	if err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("unable to open authorized keys directory: %s", err)
 	}
+
 	for _, f := range files {
 		if !f.IsDir() {
 			publicKey, err := LoadPublicKeyFile(path.Join(c.clientDir, f.Name()))
@@ -81,6 +83,7 @@ func (c *ClientKeyManager) RegisterTLSConfig(tlsConfig *tls.Config) error {
 	if err != nil {
 		return fmt.Errorf("CA pool generation error: %s", err)
 	}
+
 	c.clientLock.RUnlock()
 
 	tlsConfig.ClientCAs = certPool
@@ -107,12 +110,14 @@ func NewIdentityAuthTLSConfig(trustKey PrivateKey, clients *ClientKeyManager, ad
 	if err != nil {
 		return nil, err
 	}
+
 	// add domain that it expects clients to use
 	domains = append(domains, domain)
 	x509Cert, err := GenerateSelfSignedServerCert(trustKey, domains, ips)
 	if err != nil {
 		return nil, fmt.Errorf("certificate generation error: %s", err)
 	}
+
 	tlsConfig.Certificates = []tls.Certificate{{
 		Certificate: [][]byte{x509Cert.Raw},
 		PrivateKey:  trustKey.CryptoPrivateKey(),
@@ -131,6 +136,7 @@ func NewCertAuthTLSConfig(caPath, certPath, keyPath string) (*tls.Config, error)
 	if err != nil {
 		return nil, fmt.Errorf("Couldn't load X509 key pair (%s, %s): %s. Key encrypted?", certPath, keyPath, err)
 	}
+
 	tlsConfig.Certificates = []tls.Certificate{cert}
 
 	// Verify client certificates against a CA?
@@ -140,6 +146,7 @@ func NewCertAuthTLSConfig(caPath, certPath, keyPath string) (*tls.Config, error)
 		if err != nil {
 			return nil, fmt.Errorf("Couldn't read CA certificate: %s", err)
 		}
+
 		certPool.AppendCertsFromPEM(file)
 
 		tlsConfig.ClientAuth = tls.RequireAndVerifyClientCert
@@ -163,6 +170,7 @@ func parseAddr(addr string) ([]net.IP, []string, error) {
 	if err != nil {
 		return nil, nil, err
 	}
+
 	var domains []string
 	var ips []net.IP
 	ip := net.ParseIP(host)
@@ -171,5 +179,6 @@ func parseAddr(addr string) ([]net.IP, []string, error) {
 	} else {
 		domains = []string{host}
 	}
+
 	return ips, domains, nil
 }

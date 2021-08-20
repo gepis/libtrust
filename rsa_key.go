@@ -57,6 +57,7 @@ func (k *rsaPublicKey) Verify(data io.Reader, alg string, signature []byte) erro
 	if err != nil {
 		return fmt.Errorf("error reading data to sign: %s", err)
 	}
+
 	hash := hasher.Sum(nil)
 
 	err = rsa.VerifyPKCS1v15(k.PublicKey, sigAlg.HashID(), hash, signature)
@@ -79,6 +80,7 @@ func (k *rsaPublicKey) toMap() map[string]interface{} {
 	for k, v := range k.extended {
 		jwk[k] = v
 	}
+
 	jwk["kty"] = k.KeyType()
 	jwk["kid"] = k.KeyID()
 	jwk["n"] = joseBase64UrlEncode(k.N.Bytes())
@@ -99,6 +101,7 @@ func (k *rsaPublicKey) PEMBlock() (*pem.Block, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to serialize RSA PublicKey to DER-encoded PKIX format: %s", err)
 	}
+
 	k.extended["kid"] = k.KeyID() // For display purposes.
 	return createPemBlock("PUBLIC KEY", derBytes, k.extended)
 }
@@ -112,6 +115,7 @@ func (k *rsaPublicKey) GetExtendedField(field string) interface{} {
 	if !ok {
 		return nil
 	}
+
 	return v
 }
 
@@ -153,6 +157,7 @@ func rsaPublicKeyFromMap(jwk map[string]interface{}) (*rsaPublicKey, error) {
 		if err != nil {
 			return nil, fmt.Errorf("JWK RSA Public Key ID: %s", err)
 		}
+
 		if kid != key.KeyID() {
 			return nil, fmt.Errorf("JWK RSA Public Key ID does not match: %s", kid)
 		}
@@ -208,6 +213,7 @@ func (k *rsaPrivateKey) Sign(data io.Reader, hashID crypto.Hash) (signature []by
 	if err != nil {
 		return nil, "", fmt.Errorf("error reading data to sign: %s", err)
 	}
+
 	hash := hasher.Sum(nil)
 
 	signature, err = rsa.SignPKCS1v15(rand.Reader, k.PrivateKey, sigAlg.HashID(), hash)
@@ -250,6 +256,7 @@ func (k *rsaPrivateKey) toMap() map[string]interface{} {
 			otherPrimeInfo["t"] = joseBase64UrlEncode(crtVal.Coeff.Bytes())
 			otherPrimesInfo[i] = otherPrimeInfo
 		}
+
 		jwk["oth"] = otherPrimesInfo
 	}
 
@@ -280,22 +287,27 @@ func rsaPrivateKeyFromMap(jwk map[string]interface{}) (*rsaPrivateKey, error) {
 	if err != nil {
 		return nil, fmt.Errorf("JWK RSA Private Key exponent: %s", err)
 	}
+
 	firstPrimeFactor, err := parseRSAPrivateKeyParamFromMap(jwk, "p")
 	if err != nil {
 		return nil, fmt.Errorf("JWK RSA Private Key prime factor: %s", err)
 	}
+
 	secondPrimeFactor, err := parseRSAPrivateKeyParamFromMap(jwk, "q")
 	if err != nil {
 		return nil, fmt.Errorf("JWK RSA Private Key prime factor: %s", err)
 	}
+
 	firstFactorCRT, err := parseRSAPrivateKeyParamFromMap(jwk, "dp")
 	if err != nil {
 		return nil, fmt.Errorf("JWK RSA Private Key CRT exponent: %s", err)
 	}
+
 	secondFactorCRT, err := parseRSAPrivateKeyParamFromMap(jwk, "dq")
 	if err != nil {
 		return nil, fmt.Errorf("JWK RSA Private Key CRT exponent: %s", err)
 	}
+
 	crtCoeff, err := parseRSAPrivateKeyParamFromMap(jwk, "qi")
 	if err != nil {
 		return nil, fmt.Errorf("JWK RSA Private Key CRT coefficient: %s", err)
@@ -332,10 +344,12 @@ func rsaPrivateKeyFromMap(jwk map[string]interface{}) (*rsaPrivateKey, error) {
 		if !ok {
 			return nil, errors.New("JWK RSA Private Key: Invalid other primes info: must be an array")
 		}
+
 		numOtherPrimeFactors := len(otherPrimesInfo)
 		if numOtherPrimeFactors == 0 {
 			return nil, errors.New("JWK RSA Privake Key: Invalid other primes info: must be absent or non-empty")
 		}
+
 		otherPrimeFactors := make([]*big.Int, numOtherPrimeFactors)
 		productOfPrimes := new(big.Int).Mul(firstPrimeFactor, secondPrimeFactor)
 		crtValues := make([]rsa.CRTValue, numOtherPrimeFactors)
@@ -350,10 +364,12 @@ func rsaPrivateKeyFromMap(jwk map[string]interface{}) (*rsaPrivateKey, error) {
 			if err != nil {
 				return nil, fmt.Errorf("JWK RSA Private Key prime factor: %s", err)
 			}
+
 			otherFactorCRT, err := parseRSAPrivateKeyParamFromMap(otherPrimeinfo, "d")
 			if err != nil {
 				return nil, fmt.Errorf("JWK RSA Private Key CRT exponent: %s", err)
 			}
+
 			otherCrtCoeff, err := parseRSAPrivateKeyParamFromMap(otherPrimeinfo, "t")
 			if err != nil {
 				return nil, fmt.Errorf("JWK RSA Private Key CRT coefficient: %s", err)

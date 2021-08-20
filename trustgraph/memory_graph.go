@@ -59,6 +59,7 @@ func (g *memoryGraph) getGrants(name string) []*Grant {
 		}
 		nodes = node.children
 	}
+
 	return node.grants
 }
 
@@ -68,6 +69,7 @@ func isSubName(name, sub string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -81,12 +83,14 @@ func (g *memoryGraph) walkGrants(start, target string, permission uint16, f walk
 	if visited == nil {
 		visited = map[*Grant]bool{}
 	}
+
 	grants := g.getGrants(start)
 	subGrants := make([]*Grant, 0, len(grants))
 	for _, grant := range grants {
 		if visited[grant] {
 			continue
 		}
+
 		visited[grant] = true
 		if grant.Permission&permission == permission {
 			if isSubName(target, grant.Subject) {
@@ -98,6 +102,7 @@ func (g *memoryGraph) walkGrants(start, target string, permission uint16, f walk
 			}
 		}
 	}
+
 	for _, grant := range subGrants {
 		var chainCopy []*Grant
 		if collect {
@@ -112,6 +117,7 @@ func (g *memoryGraph) walkGrants(start, target string, permission uint16, f walk
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -128,6 +134,7 @@ func (g *memoryGraph) GetGrants(key libtrust.PublicKey, node string, permission 
 		grants = append(grants, grantChain)
 		return false
 	}
+
 	g.walkGrants(key.KeyID(), node, permission, collect, nil, nil, true)
 	return grants, nil
 }

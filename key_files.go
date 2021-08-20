@@ -102,6 +102,7 @@ func SaveKey(filename string, key PrivateKey) error {
 		if err != nil {
 			return fmt.Errorf("unable to encode private key PEM: %s", err)
 		}
+
 		encodedKey = pem.EncodeToMemory(pemBlock)
 	}
 
@@ -239,6 +240,7 @@ func addKeySetPEMFile(filename string, key PublicKey) error {
 	if err != nil {
 		return fmt.Errorf("unable to open trusted client keys file %s: %s", filename, err)
 	}
+
 	defer file.Close()
 
 	pemBlock, err := key.PEMBlock()

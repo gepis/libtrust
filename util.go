@@ -44,6 +44,7 @@ func LoadOrCreateTrustKey(trustKeyPath string) (PrivateKey, error) {
 	} else if err != nil {
 		return nil, fmt.Errorf("error loading key file: %s", err)
 	}
+
 	return trustKey, nil
 }
 
@@ -167,14 +168,15 @@ func joseBase64UrlDecode(s string) ([]byte, error) {
 	s = strings.Replace(s, "\n", "", -1)
 	s = strings.Replace(s, " ", "", -1)
 	switch len(s) % 4 {
-	case 0:
-	case 2:
-		s += "=="
-	case 3:
-		s += "="
-	default:
-		return nil, errors.New("illegal base64url string")
+		case 0:
+		case 2:
+			s += "=="
+		case 3:
+			s += "="
+		default:
+			return nil, errors.New("illegal base64url string")
 	}
+
 	return base64.URLEncoding.DecodeString(s)
 }
 
@@ -187,6 +189,7 @@ func keyIDEncode(b []byte) string {
 		end := start + 4
 		buf.WriteString(s[start:end] + ":")
 	}
+
 	buf.WriteString(s[i*4:])
 	return buf.String()
 }
@@ -201,6 +204,7 @@ func keyIDFromCryptoKey(pubKey PublicKey) string {
 	if err != nil {
 		return ""
 	}
+
 	hasher := crypto.SHA256.New()
 	hasher.Write(derBytes)
 	return keyIDEncode(hasher.Sum(nil)[:30])
@@ -216,6 +220,7 @@ func stringFromMap(m map[string]interface{}, key string) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("%q value must be a string", key)
 	}
+
 	delete(m, key)
 
 	return str, nil
@@ -228,10 +233,12 @@ func parseECCoordinate(cB64Url string, curve elliptic.Curve) (*big.Int, error) {
 	if err != nil {
 		return nil, fmt.Errorf("invalid base64 URL encoding: %s", err)
 	}
+
 	cByteLength := len(cBytes)
 	if cByteLength != curveByteLen {
 		return nil, fmt.Errorf("invalid number of octets: got %d, should be %d", cByteLength, curveByteLen)
 	}
+
 	return new(big.Int).SetBytes(cBytes), nil
 }
 
@@ -282,6 +289,7 @@ func serializeRSAPublicExponentParam(e int) []byte {
 			break
 		}
 	}
+
 	return buf[i:]
 }
 
@@ -290,6 +298,7 @@ func parseRSAPublicExponentParam(eB64Url string) (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("invalid base64 URL encoding: %s", err)
 	}
+
 	// Only the minimum number of bytes were used to represent E, but
 	// binary.BigEndian.Uint32 expects at least 4 bytes, so we need
 	// to add zero padding if necassary.
@@ -318,16 +327,16 @@ func createPemBlock(name string, derBytes []byte, headers map[string]interface{}
 	pemBlock := &pem.Block{Type: name, Bytes: derBytes, Headers: map[string]string{}}
 	for k, v := range headers {
 		switch val := v.(type) {
-		case string:
-			pemBlock.Headers[k] = val
-		case []string:
-			if k == "hosts" {
-				pemBlock.Headers[k] = strings.Join(val, ",")
-			} else {
+			case string:
+				pemBlock.Headers[k] = val
+			case []string:
+				if k == "hosts" {
+					pemBlock.Headers[k] = strings.Join(val, ",")
+				} else {
+					// Return error, non-encodable type
+				}
+			default:
 				// Return error, non-encodable type
-			}
-		default:
-			// Return error, non-encodable type
 		}
 	}
 
@@ -358,6 +367,7 @@ func addPEMHeadersToKey(pemBlock *pem.Block, pubKey PublicKey) {
 		} else {
 			safeVal = value
 		}
+
 		pubKey.AddExtendedField(key, safeVal)
 	}
 }

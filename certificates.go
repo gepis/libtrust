@@ -142,6 +142,7 @@ func LoadCertificateBundle(filename string) ([]*x509.Certificate, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	certificates := []*x509.Certificate{}
 	var block *pem.Block
 	block, b = pem.Decode(b)
@@ -167,9 +168,11 @@ func LoadCertificatePool(filename string) (*x509.CertPool, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	pool := x509.NewCertPool()
 	for _, cert := range certs {
 		pool.AddCert(cert)
 	}
+
 	return pool, nil
 }

@@ -75,6 +75,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	tlsListener := tls.NewListener(listener, tlsConfig)
 	server.Serve(tlsListener)
 }

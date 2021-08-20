@@ -31,26 +31,26 @@ var (
 
 func rsaSignatureAlgorithmByName(alg string) (*signatureAlgorithm, error) {
 	switch {
-	case alg == "RS256":
-		return rs256, nil
-	case alg == "RS384":
-		return rs384, nil
-	case alg == "RS512":
-		return rs512, nil
-	default:
-		return nil, fmt.Errorf("RSA Digital Signature Algorithm %q not supported", alg)
+		case alg == "RS256":
+			return rs256, nil
+		case alg == "RS384":
+			return rs384, nil
+		case alg == "RS512":
+			return rs512, nil
+		default:
+			return nil, fmt.Errorf("RSA Digital Signature Algorithm %q not supported", alg)
 	}
 }
 
 func rsaPKCS1v15SignatureAlgorithmForHashID(hashID crypto.Hash) *signatureAlgorithm {
 	switch {
-	case hashID == crypto.SHA512:
-		return rs512
-	case hashID == crypto.SHA384:
-		return rs384
-	case hashID == crypto.SHA256:
-		fallthrough
-	default:
-		return rs256
+		case hashID == crypto.SHA512:
+			return rs512
+		case hashID == crypto.SHA384:
+			return rs384
+		case hashID == crypto.SHA256:
+			fallthrough
+		default:
+			return rs256
 	}
 }
